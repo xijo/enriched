@@ -9,6 +9,8 @@ class Enriched::URL
   def to_s
     part_of_tag? and return url
     url = Enriched::Youtube.new(url_with_schema, opts).process
+    url = Enriched::Vimeo.new(url).process
+    Enriched::Image.new(url).process
   end
 
   private

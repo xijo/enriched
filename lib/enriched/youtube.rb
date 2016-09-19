@@ -13,20 +13,25 @@ class Enriched::Youtube
   attr_accessor :url, :opts
 
   def initialize(url, opts = {})
-    @url = url
-    @opts = opts
+    @url  = url
+    @opts = extract_opts(opts)
+  end
+
+  def extract_opts(opts)
+    return { disabled: true } if opts[:youtube] == false
+    result = Hash(opts[:youtube])
+    result[:width] = opts[:width]
+    result[:height] = opts[:height]
+    result
   end
 
   def process
     id or return url
 
-    case opts[:youtube]
-    when :preview, 'preview'
-      preview
-    when true, nil
-      iframe
-    else
+    if opts[:disabled]
       url
+    else
+      opts[:preview] ? preview : iframe
     end
   end
 
@@ -39,7 +44,8 @@ class Enriched::Youtube
   private
 
   def preview
-    image_tag src: "https://img.youtube.com/vi/#{id}/0.jpg"
+    img = image_tag(src: "https://img.youtube.com/vi/#{id}/0.jpg")
+    link_tag(img, href: opts[:preview])
   end
 
   def iframe
